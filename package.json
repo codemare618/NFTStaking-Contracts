@@ -1,0 +1,28 @@
+{
+  "name": "polygon",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "test-token": "npx hardhat --network localhost test tests/coder-test.js",
+    "test-nft": "npx hardhat --network localhost test tests/nft-test.js",
+    "deploy-mumbai": "npx hardhat run scripts/deploy-example.js",
+    "deploy-main": "npx hardhat --network main run scripts/deploy-example.js"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "devDependencies": {
+    "@nomiclabs/hardhat-ethers": "^2.0.2",
+    "@nomiclabs/hardhat-truffle5": "^2.0.2",
+    "@nomiclabs/hardhat-waffle": "^2.0.1",
+    "@nomiclabs/hardhat-web3": "^2.0.0",
+    "@openzeppelin/contracts": "^4.3.2",
+    "@openzeppelin/test-helpers": "^0.5.15",
+    "chai": "^4.3.4",
+    "ethereum-waffle": "^3.4.0",
+    "ethers": "^5.4.7",
+    "hardhat": "^2.6.5",
+    "web3": "^1.6.0"
+  }
+}
