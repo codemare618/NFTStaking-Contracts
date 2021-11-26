@@ -4,10 +4,11 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-    "test-token": "npx hardhat --network localhost test tests/coder-test.js",
+    "test-token": "npx hardhat --network localhost test tests/aura-test.js",
     "test-nft": "npx hardhat --network localhost test tests/nft-test.js",
-    "deploy-mumbai": "npx hardhat run scripts/deploy-example.js",
-    "deploy-main": "npx hardhat --network main run scripts/deploy-example.js"
+    "test-new-nft": "npx hardhat --network localhost test tests/new-nft-test.js",
+    "test-pool": "npx hardhat --network localhost test tests/pool-test.js",
+    "deploy-rinkeby": "npx hardhat --network rinkeby run scripts/deploy-example.js"
   },
   "keywords": [],
   "author": "",

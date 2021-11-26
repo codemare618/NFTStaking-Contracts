@@ -10,6 +10,7 @@ import "@openzeppelin/contracts/utils/structs/EnumerableSet.sol";
 import "@openzeppelin/contracts/utils/structs/EnumerableMap.sol";
 import "@openzeppelin/contracts/utils/math/SafeMath.sol";
 import "@openzeppelin/contracts/utils/Address.sol";
+import "hardhat/console.sol";
 
 contract NFTStakingPool is Ownable, IERC721Receiver {
     using EnumerableSet for EnumerableSet.UintSet;
@@ -21,7 +22,8 @@ contract NFTStakingPool is Ownable, IERC721Receiver {
     IERC721 private _nftToken;
     uint private _rewardsPerday;
 
-    bytes4 private constant MINT_SELECTOR = bytes4(keccak256("mint(address,uint256)"));
+    //bytes4 private constant MINT_SELECTOR = bytes4(keccak256("mint(address,uint256)"));
+    bytes4 private constant TRANSFER_SELECTOR = bytes4(keccak256("transfer(address,uint256)"));
 
     struct DepositInfo {
         uint256 depositTime;
@@ -50,7 +52,10 @@ contract NFTStakingPool is Ownable, IERC721Receiver {
     // Withdraw staked NFT
     function withdrawNFT(uint256 tokenId) external {
         address tokenOwner = _msgSender();
+        require(isTokenStaked(tokenId), "The token is not staked");
         require(stakerOfToken(tokenId) == tokenOwner, "Not the token owner");
+
+        _withdrawReward(tokenOwner, tokenId);
 
         // remove from token owners map
         _tokenOwners.remove(tokenId);
@@ -60,16 +65,32 @@ contract NFTStakingPool is Ownable, IERC721Receiver {
 
         // Give NFT back to user
         _nftToken.transferFrom(address(this), tokenOwner, tokenId);
+    }
 
-        withdrawReward(tokenId);
+    //get staked NFT IDs by user (Remove this function in the further)
+    function nftsStakedFor(address owner) public view returns (uint256[] memory){
+        EnumerableSet.UintSet storage tokensSet = _stakedTokens[owner];
+        uint256 ownerNftCount = tokensSet.length();
+        uint256[] memory ownerNftIds = new uint256[](ownerNftCount);
+        for (uint256 i; i < ownerNftCount; i++) {
+            ownerNftIds[i] = tokensSet.at(i);
+        }
+        return ownerNftIds;
     }
 
     // Withdraw Reward
     function withdrawReward(uint256 tokenId) public {
         address tokenOwner = _msgSender();
         require(stakerOfToken(tokenId) == tokenOwner, "Not the token owner");
+        _withdrawReward(tokenOwner, tokenId);
+    }
+
+    function _withdrawReward(address to_, uint256 tokenId) private {
         // Send remaining rewards
-        _sendReward(_remainingReward(tokenId), tokenOwner);
+        DepositInfo storage depositInfo = _depositInfo[tokenId];
+        uint256 _amount = _remainingReward(tokenId);
+        depositInfo.currentWithdrawals.add(_amount);
+        _sendReward(_amount, to_);
     }
 
     function stakerOfToken(uint256 tokenId) public view returns (address){
@@ -104,9 +125,9 @@ contract NFTStakingPool is Ownable, IERC721Receiver {
         return tokensSet.length();
     }
 
-    function stakeInfoForUserAt(address owner, uint256 index) public view returns (address, uint256, uint256, uint256) {
+    function stakedTokenFor(address owner, uint256 index) public view returns (uint256) {
         EnumerableSet.UintSet storage tokensSet = _stakedTokens[owner];
-        return stakeInfoForToken(tokensSet.at(index));
+        return tokensSet.at(index);
     }
 
     /**
@@ -118,7 +139,7 @@ contract NFTStakingPool is Ownable, IERC721Receiver {
         EnumerableSet.UintSet storage tokens =  _stakedTokens[owner];
 
         // Check if this is already staked
-        require(!tokens.add(tokenId), "Already staked pool");
+        require(tokens.add(tokenId), "Already staked pool");
 
         // Add to _tokenOwners
         _tokenOwners.set(tokenId, owner);
@@ -137,12 +158,13 @@ contract NFTStakingPool is Ownable, IERC721Receiver {
     function _totalRewards(uint256 tokenId) private view returns(uint256) {
         // TODO Calculation Logic Here
         uint secondsElapsed = block.timestamp - _depositInfo[tokenId].depositTime;
-        uint daysElapsed = secondsElapsed / 86400; // per-day
+        //uint daysElapsed = secondsElapsed / 86400; // per-day
+        uint daysElapsed = secondsElapsed / 3; // every 1 min
         return daysElapsed * _rewardsPerday;
     }
 
     function _sendReward(uint256 amount, address to) private {
-        bytes memory data = abi.encodeWithSelector(MINT_SELECTOR, to, amount);
+        bytes memory data = abi.encodeWithSelector(TRANSFER_SELECTOR, to, amount);
         address(_rewardToken).functionCall(data);
     }
 

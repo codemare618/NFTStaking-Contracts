@@ -1,8 +1,10 @@
 module.exports = {
-    privateKey: '',
-    aura: {
-        initialSupply: '2000000000',
-        name: 'InvidMeToken',
-        symbol: 'CODER',
+    main: {
+        nftAddress: '',
+        privateKey: '',
+    },
+    rinkeby: {
+        nftAddress: '',
+        privateKey: '',
     }
 };

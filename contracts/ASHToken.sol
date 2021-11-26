@@ -8,7 +8,7 @@ import "@openzeppelin/contracts/utils/Counters.sol";
 import "./common/IERC20Permit.sol";
 import "./common/EIP712.sol";
 
-contract AuraToken is ERC20, Ownable, Pausable, EIP712, IERC20Permit {
+contract ASHToken is ERC20, Ownable, Pausable, EIP712, IERC20Permit {
 
     using Counters for Counters.Counter;
     mapping(address => Counters.Counter) private _nonces;
@@ -101,4 +101,12 @@ contract AuraToken is ERC20, Ownable, Pausable, EIP712, IERC20Permit {
         current = nonce.current();
         nonce.increment();
     }
+
+//    function pause() external only whenNotPaused onlyOwner {
+//        _pause();
+//    }
+//
+//    function resume() external only whenPaused onlyOwner {
+//        _unpause();
+//    }
 }
