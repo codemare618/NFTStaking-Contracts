@@ -31,4 +31,3 @@ config.local.js
 
 tests/coder-test.js
 tests/nft-test.js
-scripts/deploy-example.js
